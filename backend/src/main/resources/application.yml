@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: kmanager
+  datasource:
+    url: jdbc:postgresql://localhost:5432/kmanager
+    username: kmanager
+    password: kmanager
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:this-is-a-dev-secret-change-in-production-min-256-bits}
+    expiration-ms: 86400000
+
+logging:
+  level:
+    com.kmanager: DEBUG
