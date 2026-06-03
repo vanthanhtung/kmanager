@@ -43,9 +43,9 @@ public class AdminController {
     }
 
     @PutMapping("/venues/{venueId}/toggle-status")
-    public ResponseEntity<Void> toggleVenueStatus(@PathVariable UUID venueId) {
+    public ResponseEntity<VenueResponse> toggleVenueStatus(@PathVariable UUID venueId) {
         venueService.toggleVenueStatus(venueId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(venueService.getVenue(venueId));
     }
 
     @DeleteMapping("/venues/{venueId}")

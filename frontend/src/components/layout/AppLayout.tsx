@@ -23,12 +23,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="app-layout">
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <nav className="top-nav">
-          <span className="brand">🎤 kmanager</span>
+          <span className="brand" style={{ cursor: 'pointer' }} onClick={() => navigate(auth.role === 'SUPER_ADMIN' ? '/admin/venues' : '/dashboard')}>🎤 kmanager</span>
           {auth.role === 'VENUE_MANAGER' && (
             <>
+              <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>{t('nav.dashboard')}</NavLink>
               <NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''}>{t('nav.rooms')}</NavLink>
               <NavLink to="/menu" className={({ isActive }) => isActive ? 'active' : ''}>{t('nav.menu')}</NavLink>
-              <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>{t('nav.dashboard')}</NavLink>
+              <NavLink to="/bills" className={({ isActive }) => isActive ? 'active' : ''}>{t('nav.bills')}</NavLink>
             </>
           )}
           {auth.role === 'SUPER_ADMIN' && (

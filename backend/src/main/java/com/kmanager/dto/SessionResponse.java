@@ -8,6 +8,10 @@ public class SessionResponse {
     private UUID roomId;
     private String roomNumber;
     private String roomName;
+    private String venueName;
+    private String venueAddress;
+    private String venueHotline;
+    private String venueWifi;
     private String customerName;
     private String customerPhone;
     private Long hourlyRate;
@@ -28,6 +32,14 @@ public class SessionResponse {
     public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
     public String getRoomName() { return roomName; }
     public void setRoomName(String roomName) { this.roomName = roomName; }
+    public String getVenueName() { return venueName; }
+    public void setVenueName(String venueName) { this.venueName = venueName; }
+    public String getVenueAddress() { return venueAddress; }
+    public void setVenueAddress(String venueAddress) { this.venueAddress = venueAddress; }
+    public String getVenueHotline() { return venueHotline; }
+    public void setVenueHotline(String venueHotline) { this.venueHotline = venueHotline; }
+    public String getVenueWifi() { return venueWifi; }
+    public void setVenueWifi(String venueWifi) { this.venueWifi = venueWifi; }
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
     public String getCustomerPhone() { return customerPhone; }

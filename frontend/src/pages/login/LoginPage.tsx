@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../store/auth';
+import { api, setToken } from '../../api/client';
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const auth = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -17,12 +16,16 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await auth.login(username, password);
-      if (auth.role === 'SUPER_ADMIN') navigate('/admin/venues');
-      else navigate('/');
+      const res = await api.login(username, password);
+      setToken(res.token);
+      localStorage.setItem('role', res.role);
+      localStorage.setItem('venueId', res.venueId || '');
+      localStorage.setItem('venueName', res.venueName || '');
+      localStorage.setItem('username', username);
+      // Must reload so AuthProvider picks up the new localStorage values
+      window.location.href = res.role === 'SUPER_ADMIN' ? '/admin/venues' : '/';
     } catch {
       setError(t('login.error_invalid'));
-    } finally {
       setLoading(false);
     }
   };

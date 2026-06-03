@@ -64,6 +64,8 @@ public class VenueService {
         Venue venue = new Venue();
         venue.setName(request.getVenueName());
         venue.setAddress(request.getAddress());
+        venue.setHotline(request.getHotline());
+        venue.setWifi(request.getWifi());
         venue.setStatus(Venue.VenueStatus.ACTIVE);
         venue = venueRepository.save(venue);
 
@@ -82,6 +84,8 @@ public class VenueService {
                 .orElseThrow(() -> new RuntimeException("Venue not found"));
         venue.setName(request.getVenueName());
         venue.setAddress(request.getAddress());
+        venue.setHotline(request.getHotline());
+        venue.setWifi(request.getWifi());
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             VenueManager manager = managerRepository.findByVenueId(venueId)
                     .orElseThrow(() -> new RuntimeException("Manager not found"));
@@ -120,11 +124,14 @@ public class VenueService {
         resp.setId(v.getId());
         resp.setName(v.getName());
         resp.setAddress(v.getAddress());
+        resp.setHotline(v.getHotline());
+        resp.setWifi(v.getWifi());
         resp.setStatus(v.getStatus().name());
         resp.setManagerUsername(managerRepository.findByVenueId(v.getId())
                 .map(VenueManager::getUsername).orElse(null));
         resp.setRoomCount(roomRepository.countByVenueId(v.getId()));
         resp.setMenuItemCount(menuItemRepository.countByVenueId(v.getId()));
+        resp.setLastActivity(v.getUpdatedAt());
         resp.setCreatedAt(v.getCreatedAt());
         return resp;
     }

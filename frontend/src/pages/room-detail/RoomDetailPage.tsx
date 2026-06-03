@@ -70,7 +70,6 @@ export default function RoomDetailPage() {
             <label>{t('roomdetail.status')}</label>
             <select value={status} onChange={e => setStatus(e.target.value)} disabled={status === 'OCCUPIED'}>
               <option value="AVAILABLE">{t('board.available')}</option>
-              <option value="CLEANING">{t('board.cleaning')}</option>
               <option value="MAINTENANCE">{t('board.maintenance')}</option>
             </select>
           </div>

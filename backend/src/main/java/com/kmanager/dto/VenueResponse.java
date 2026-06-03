@@ -7,6 +7,8 @@ public class VenueResponse {
     private UUID id;
     private String name;
     private String address;
+    private String hotline;
+    private String wifi;
     private String status;
     private String managerUsername;
     private long roomCount;
@@ -20,6 +22,10 @@ public class VenueResponse {
     public void setName(String name) { this.name = name; }
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+    public String getHotline() { return hotline; }
+    public void setHotline(String hotline) { this.hotline = hotline; }
+    public String getWifi() { return wifi; }
+    public void setWifi(String wifi) { this.wifi = wifi; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public String getManagerUsername() { return managerUsername; }

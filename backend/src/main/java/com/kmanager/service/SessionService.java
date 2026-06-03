@@ -20,16 +20,19 @@ public class SessionService {
     private final BillRepository billRepository;
     private final RoomRepository roomRepository;
     private final MenuItemRepository menuItemRepository;
+    private final VenueRepository venueRepository;
     private final WebSocketController wsController;
 
     public SessionService(SessionRepository sessionRepository, BillItemRepository billItemRepository,
                           BillRepository billRepository, RoomRepository roomRepository,
-                          MenuItemRepository menuItemRepository, WebSocketController wsController) {
+                          MenuItemRepository menuItemRepository, VenueRepository venueRepository,
+                          WebSocketController wsController) {
         this.sessionRepository = sessionRepository;
         this.billItemRepository = billItemRepository;
         this.billRepository = billRepository;
         this.roomRepository = roomRepository;
         this.menuItemRepository = menuItemRepository;
+        this.venueRepository = venueRepository;
         this.wsController = wsController;
     }
 
@@ -93,6 +96,7 @@ public class SessionService {
             item.setQuantity(request.getQuantity());
             item.setUnitPrice(menuItem.getPrice());
             billItemRepository.save(item);
+            session.getBillItems().add(item);
         }
 
         notifyVenue(venueId.toString());
@@ -108,20 +112,31 @@ public class SessionService {
             throw new RuntimeException("Session is already closed");
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        session.setEndedAt(now);
+        Venue venue = venueRepository.findById(venueId).orElse(null);
+
+        LocalDateTime startAt = request.getStartedAt() != null
+                ? LocalDateTime.parse(request.getStartedAt()) : session.getStartedAt();
+        LocalDateTime endAt = request.getEndedAt() != null
+                ? LocalDateTime.parse(request.getEndedAt()) : LocalDateTime.now();
+        long rate = request.getHourlyRate() != null ? request.getHourlyRate() : session.getHourlyRate();
+
+        session.setStartedAt(startAt);
+        session.setEndedAt(endAt);
+        session.setHourlyRate(rate);
         session.setStatus(Session.SessionStatus.CLOSED);
         sessionRepository.save(session);
 
-        long durationSeconds = java.time.Duration.between(session.getStartedAt(), now).getSeconds();
-        long roomCharge = (long) Math.ceil(durationSeconds / 3600.0 * session.getHourlyRate());
+        long durationSeconds = java.time.Duration.between(startAt, endAt).getSeconds();
+        long roomCharge = (long) Math.ceil(durationSeconds / 3600.0 * rate);
         long itemSubtotal = session.getBillItems().stream()
                 .mapToLong(i -> i.getQuantity() * i.getUnitPrice()).sum();
-        long grandTotal = roomCharge + itemSubtotal;
+        long discount = request.getDiscount() != null ? request.getDiscount() : 0L;
+        long grandTotal = roomCharge + itemSubtotal - discount;
 
-        String billNumber = now.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "-" +
+        String billNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "-" +
                 String.format("%04d", billRepository.countByVenueIdAndCreatedAtBetween(venueId,
-                        now.toLocalDate().atStartOfDay(), now.toLocalDate().plusDays(1).atStartOfDay()) + 1);
+                        LocalDateTime.now().toLocalDate().atStartOfDay(),
+                        LocalDateTime.now().toLocalDate().plusDays(1).atStartOfDay()) + 1);
 
         Bill bill = new Bill();
         bill.setSession(session);
@@ -130,13 +145,13 @@ public class SessionService {
         bill.setRoomNumber(session.getRoom().getRoomNumber());
         bill.setCustomerName(session.getCustomerName());
         bill.setCustomerPhone(session.getCustomerPhone());
-        bill.setStartedAt(session.getStartedAt());
-        bill.setEndedAt(now);
+        bill.setStartedAt(startAt);
+        bill.setEndedAt(endAt);
         bill.setDurationSeconds(durationSeconds);
-        bill.setHourlyRate(session.getHourlyRate());
+        bill.setHourlyRate(rate);
         bill.setRoomCharge(roomCharge);
         bill.setItemSubtotal(itemSubtotal);
-        bill.setDiscount(0L);
+        bill.setDiscount(discount);
         bill.setGrandTotal(grandTotal);
         bill.setPaymentMethod(Bill.PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase()));
         bill.setAmountTendered(request.getAmountTendered());
@@ -146,11 +161,11 @@ public class SessionService {
         bill = billRepository.save(bill);
 
         Room room = session.getRoom();
-        room.setStatus(Room.RoomStatus.CLEANING);
+        room.setStatus(Room.RoomStatus.AVAILABLE);
         roomRepository.save(room);
 
         notifyVenue(venueId.toString());
-        return toBillResponse(bill);
+        return toBillResponse(bill, venue);
     }
 
     public SessionResponse getSession(UUID sessionId) {
@@ -161,6 +176,12 @@ public class SessionService {
     public List<SessionResponse> getActiveSessions(UUID venueId) {
         return sessionRepository.findByVenueIdAndStatus(venueId, Session.SessionStatus.ACTIVE)
                 .stream().map(this::toSessionResponse).collect(Collectors.toList());
+    }
+
+    public SessionResponse getActiveSessionByRoom(UUID roomId) {
+        List<Session> sessions = sessionRepository.findByRoomIdAndStatus(roomId, Session.SessionStatus.ACTIVE);
+        if (sessions.isEmpty()) throw new RuntimeException("No active session for this room");
+        return toSessionResponse(sessions.get(0));
     }
 
     private SessionResponse toSessionResponse(Session s) {
@@ -175,6 +196,10 @@ public class SessionService {
         resp.setRoomId(s.getRoom().getId());
         resp.setRoomNumber(s.getRoom().getRoomNumber());
         resp.setRoomName(s.getRoom().getNameEn());
+        resp.setVenueName(s.getVenue().getName());
+        resp.setVenueAddress(s.getVenue().getAddress());
+        resp.setVenueHotline(s.getVenue().getHotline());
+        resp.setVenueWifi(s.getVenue().getWifi());
         resp.setCustomerName(s.getCustomerName());
         resp.setCustomerPhone(s.getCustomerPhone());
         resp.setHourlyRate(s.getHourlyRate());
@@ -192,10 +217,16 @@ public class SessionService {
         return resp;
     }
 
-    private BillResponse toBillResponse(Bill b) {
+    private BillResponse toBillResponse(Bill b, Venue venue) {
         BillResponse resp = new BillResponse();
         resp.setId(b.getId());
         resp.setBillNumber(b.getBillNumber());
+        if (venue != null) {
+            resp.setVenueName(venue.getName());
+            resp.setVenueAddress(venue.getAddress());
+            resp.setVenueHotline(venue.getHotline());
+            resp.setVenueWifi(venue.getWifi());
+        }
         resp.setRoomNumber(b.getRoomNumber());
         resp.setCustomerName(b.getCustomerName());
         resp.setCustomerPhone(b.getCustomerPhone());
@@ -212,6 +243,12 @@ public class SessionService {
         resp.setChangeDue(b.getChangeDue());
         resp.setCreatedBy(b.getCreatedBy());
         resp.setCreatedAt(b.getCreatedAt().toString());
+        if (b.getSession() != null) {
+            resp.setItems(b.getSession().getBillItems().stream().map(i -> new BillItemResponse(
+                    i.getId(), i.getMenuItemId(), i.getItemNameEn(), i.getItemNameVi(),
+                    i.getQuantity(), i.getUnitPrice(), (long) i.getQuantity() * i.getUnitPrice()
+            )).collect(Collectors.toList()));
+        }
         return resp;
     }
 
@@ -254,7 +291,104 @@ public class SessionService {
     public List<BillResponse> getTodayBills(UUID venueId) {
         LocalDateTime todayStart = LocalDateTime.now().toLocalDate().atStartOfDay();
         LocalDateTime todayEnd = todayStart.plusDays(1);
+        Venue venue = venueRepository.findById(venueId).orElse(null);
         return billRepository.findByVenueIdAndCreatedAtBetweenOrderByCreatedAtDesc(venueId, todayStart, todayEnd)
-                .stream().map(this::toBillResponse).collect(Collectors.toList());
+                .stream().map(b -> toBillResponse(b, venue)).collect(Collectors.toList());
+    }
+
+    public BillResponse getBill(UUID venueId, UUID billId) {
+        Venue venue = venueRepository.findById(venueId).orElse(null);
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new RuntimeException("Bill not found"));
+        return toBillResponse(bill, venue);
+    }
+
+    public List<BillResponse> getAllBills(UUID venueId) {
+        Venue venue = venueRepository.findById(venueId).orElse(null);
+        return billRepository.findByVenueIdOrderByCreatedAtDesc(venueId)
+                .stream().map(b -> toBillResponse(b, venue)).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public BillResponse createManualBill(UUID venueId, ManualBillRequest request, String username) {
+        Venue venue = venueRepository.findById(venueId).orElseThrow();
+
+        // Create a dummy room — always create a new one to avoid constraint issues
+        Room room = new Room();
+        room.setVenue(venue);
+        room.setRoomNumber("M" + System.currentTimeMillis() % 100000);
+        room.setHourlyRate(request.getHourlyRate() != null ? request.getHourlyRate() : 0L);
+        room.setStatus(Room.RoomStatus.AVAILABLE);
+        room = roomRepository.save(room);
+
+        // Create session
+        Session session = new Session();
+        session.setVenue(venue);
+        session.setRoom(room);
+        session.setCustomerName(request.getCustomerName() != null ? request.getCustomerName() : "Walk-in");
+        session.setCustomerPhone(request.getCustomerPhone());
+        session.setHourlyRate(request.getHourlyRate() != null ? request.getHourlyRate() : 0L);
+        session.setStatus(Session.SessionStatus.ACTIVE);
+        session.setStartedAt(LocalDateTime.parse(request.getStartedAt()));
+        session.setCreatedBy(username);
+        session = sessionRepository.save(session);
+
+        // Add manual items
+        if (request.getItems() != null) {
+            for (ManualBillRequest.ManualBillItem mi : request.getItems()) {
+                BillItem item = new BillItem();
+                item.setSession(session);
+                item.setMenuItemId(null);
+                item.setItemNameEn(mi.getItemNameEn());
+                item.setItemNameVi(mi.getItemNameVi());
+                item.setQuantity(mi.getQuantity());
+                item.setUnitPrice(mi.getUnitPrice());
+                billItemRepository.save(item);
+                session.getBillItems().add(item);
+            }
+        }
+
+        // Close immediately
+        LocalDateTime endAt = LocalDateTime.parse(request.getEndedAt());
+        session.setEndedAt(endAt);
+        session.setStatus(Session.SessionStatus.CLOSED);
+        sessionRepository.save(session);
+
+        long durationSeconds = java.time.Duration.between(session.getStartedAt(), endAt).getSeconds();
+        long rate = session.getHourlyRate();
+        long roomCharge = (long) Math.ceil(durationSeconds / 3600.0 * rate);
+        long itemSubtotal = session.getBillItems().stream().mapToLong(i -> i.getQuantity() * i.getUnitPrice()).sum();
+        long discount = request.getDiscount() != null ? request.getDiscount() : 0L;
+        long grandTotal = roomCharge + itemSubtotal - discount;
+
+        String billNumber = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + "-M" +
+                System.currentTimeMillis() % 10000;
+
+        Bill bill = new Bill();
+        bill.setSession(session);
+        bill.setBillNumber(billNumber);
+        bill.setVenueId(venueId);
+        bill.setRoomNumber(request.getRoomNumber() != null ? request.getRoomNumber() : room.getRoomNumber());
+        bill.setCustomerName(session.getCustomerName());
+        bill.setCustomerPhone(session.getCustomerPhone());
+        bill.setStartedAt(session.getStartedAt());
+        bill.setEndedAt(endAt);
+        bill.setDurationSeconds(durationSeconds);
+        bill.setHourlyRate(rate);
+        bill.setRoomCharge(roomCharge);
+        bill.setItemSubtotal(itemSubtotal);
+        bill.setDiscount(discount);
+        bill.setGrandTotal(grandTotal);
+        bill.setPaymentMethod(request.getPaymentMethod() != null
+                ? Bill.PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase())
+                : Bill.PaymentMethod.CASH);
+        bill.setAmountTendered(request.getAmountTendered());
+        bill.setChangeDue(request.getAmountTendered() != null ? request.getAmountTendered() - grandTotal : null);
+        bill.setCreatedBy(username);
+
+        bill = billRepository.save(bill);
+
+        notifyVenue(venueId.toString());
+        return toBillResponse(bill, venue);
     }
 }

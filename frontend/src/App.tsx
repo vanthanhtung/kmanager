@@ -5,6 +5,9 @@ import RoomBoard from './pages/room-board/RoomBoardPage';
 import RoomCheckin from './pages/room-checkin/RoomCheckinPage';
 import ActiveSession from './pages/active-session/ActiveSessionPage';
 import BillClose from './pages/bill-close/BillClosePage';
+import BillDetail from './pages/bill-detail/BillDetailPage';
+import Bills from './pages/bills/BillsPage';
+import ManualBill from './pages/manual-bill/ManualBillPage';
 import Dashboard from './pages/dashboard/DashboardPage';
 import MenuList from './pages/menu-list/MenuListPage';
 import MenuDetail from './pages/menu-detail/MenuDetailPage';
@@ -28,6 +31,9 @@ export default function App() {
       <Route path="/checkin/:roomId" element={<Protected><AppLayout><RoomCheckin /></AppLayout></Protected>} />
       <Route path="/session/:sessionId" element={<Protected><AppLayout><ActiveSession /></AppLayout></Protected>} />
       <Route path="/bill/:sessionId" element={<Protected><AppLayout><BillClose /></AppLayout></Protected>} />
+      <Route path="/bill-detail/:billId" element={<Protected><AppLayout><BillDetail /></AppLayout></Protected>} />
+      <Route path="/bills" element={<Protected><AppLayout><Bills /></AppLayout></Protected>} />
+      <Route path="/bills/manual" element={<Protected><AppLayout><ManualBill /></AppLayout></Protected>} />
       <Route path="/dashboard" element={<Protected><AppLayout><Dashboard /></AppLayout></Protected>} />
       <Route path="/menu" element={<Protected><AppLayout><MenuList /></AppLayout></Protected>} />
       <Route path="/menu/:itemId" element={<Protected><AppLayout><MenuDetail /></AppLayout></Protected>} />

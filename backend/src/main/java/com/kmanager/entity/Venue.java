@@ -17,6 +17,12 @@ public class Venue {
     @Column(columnDefinition = "TEXT")
     private String address;
 
+    @Column(length = 20)
+    private String hotline;
+
+    @Column(length = 100)
+    private String wifi;
+
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private VenueStatus status = VenueStatus.ACTIVE;
@@ -46,6 +52,10 @@ public class Venue {
     public void setName(String name) { this.name = name; }
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+    public String getHotline() { return hotline; }
+    public void setHotline(String hotline) { this.hotline = hotline; }
+    public String getWifi() { return wifi; }
+    public void setWifi(String wifi) { this.wifi = wifi; }
     public VenueStatus getStatus() { return status; }
     public void setStatus(VenueStatus status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }

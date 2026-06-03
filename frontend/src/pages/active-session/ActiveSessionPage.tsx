@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
 
 export default function ActiveSessionPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
   const [session, setSession] = useState<any>(null);
@@ -12,8 +12,14 @@ export default function ActiveSessionPage() {
   const [search, setSearch] = useState('');
   const [activeCat, setActiveCat] = useState('ALL');
   const [loading, setLoading] = useState(true);
+  const addingRef = useRef(false);
+  const isVi = i18n.language.startsWith('vi');
+
+  const getName = (item: any) => isVi ? (item.nameVi || item.nameEn) : item.nameEn;
+  const getCatName = (item: any) => isVi ? (item.categoryNameVi || item.categoryNameEn) : item.categoryNameEn;
 
   const load = async () => {
+    if (addingRef.current) return;
     const [s, items] = await Promise.all([api.getSession(sessionId!), api.getMenuItems()]);
     setSession(s);
     setMenuItems(items);
@@ -23,8 +29,13 @@ export default function ActiveSessionPage() {
   useEffect(() => { load(); const i = setInterval(load, 15000); return () => clearInterval(i); }, [sessionId]);
 
   const addItem = async (menuItemId: string) => {
-    const updated = await api.addItem(sessionId!, menuItemId);
-    setSession(updated);
+    addingRef.current = true;
+    try {
+      const updated = await api.addItem(sessionId!, menuItemId);
+      setSession(updated);
+    } finally {
+      addingRef.current = false;
+    }
   };
 
   const formatCurrency = (v: number) => v.toLocaleString('vi-VN') + 'đ';
@@ -36,10 +47,10 @@ export default function ActiveSessionPage() {
   if (loading) return <div className="spinner" />;
   if (!session) return <p>{t('common.no_data')}</p>;
 
-  const categories = [...new Set(menuItems.map((i: any) => i.category?.nameEn || ''))];
+  const categories = [...new Set(menuItems.map((i: any) => getCatName(i) || ''))];
   const filtered = menuItems.filter((i: any) => {
-    if (search && !i.nameEn.toLowerCase().includes(search.toLowerCase()) && !i.code.toLowerCase().includes(search.toLowerCase())) return false;
-    if (activeCat !== 'ALL' && i.category?.nameEn !== activeCat) return false;
+    if (search && !getName(i).toLowerCase().includes(search.toLowerCase()) && !i.code.toLowerCase().includes(search.toLowerCase())) return false;
+    if (activeCat !== 'ALL' && getCatName(i) !== activeCat) return false;
     return true;
   });
 
@@ -57,7 +68,7 @@ export default function ActiveSessionPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
           {filtered.map((item: any) => (
             <div key={item.id} className="card" style={{ cursor: 'pointer', textAlign: 'center' }} onClick={() => addItem(item.id)}>
-              <div style={{ fontWeight: 500, fontSize: 14 }}>{item.nameEn}</div>
+              <div style={{ fontWeight: 500, fontSize: 14 }}>{getName(item)}</div>
               <div style={{ fontSize: 13, color: '#666' }}>{formatCurrency(item.price)}</div>
               <button className="btn-primary btn-sm" style={{ marginTop: 8 }}>
                 {t('session.add')}
@@ -78,7 +89,7 @@ export default function ActiveSessionPage() {
           {(!session.items || session.items.length === 0) && <p style={{ fontSize: 13, color: '#666' }}>{t('session.no_items')}</p>}
           {session.items?.map((item: any, idx: number) => (
             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #eee', fontSize: 14 }}>
-              <span>{item.quantity}× {item.itemNameEn}</span>
+              <span>{item.quantity}× {isVi ? (item.itemNameVi || item.itemNameEn) : item.itemNameEn}</span>
               <span>{formatCurrency(item.lineTotal)}</span>
             </div>
           ))}

@@ -17,7 +17,7 @@ public class BillItem {
     @JoinColumn(name = "session_id", nullable = false)
     private Session session;
 
-    @Column(name = "menu_item_id", nullable = false)
+    @Column(name = "menu_item_id")
     private UUID menuItemId;
 
     @Column(name = "item_name_en", nullable = false, length = 200)

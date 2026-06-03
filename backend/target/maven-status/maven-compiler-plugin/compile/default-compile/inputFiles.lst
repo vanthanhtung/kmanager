@@ -14,6 +14,7 @@
 /Users/tungvan/Code/kmanager/backend/src/main/java/com/kmanager/dto/DashboardResponse.java
 /Users/tungvan/Code/kmanager/backend/src/main/java/com/kmanager/dto/LoginRequest.java
 /Users/tungvan/Code/kmanager/backend/src/main/java/com/kmanager/dto/LoginResponse.java
+/Users/tungvan/Code/kmanager/backend/src/main/java/com/kmanager/dto/ManualBillRequest.java
 /Users/tungvan/Code/kmanager/backend/src/main/java/com/kmanager/dto/SessionResponse.java
 /Users/tungvan/Code/kmanager/backend/src/main/java/com/kmanager/dto/VenueResponse.java
 /Users/tungvan/Code/kmanager/backend/src/main/java/com/kmanager/entity/Bill.java

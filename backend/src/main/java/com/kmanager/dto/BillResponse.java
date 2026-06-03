@@ -1,8 +1,14 @@
 package com.kmanager.dto;
 
+import java.util.List;
+
 public class BillResponse {
     private java.util.UUID id;
     private String billNumber;
+    private String venueName;
+    private String venueAddress;
+    private String venueHotline;
+    private String venueWifi;
     private String roomNumber;
     private String customerName;
     private String customerPhone;
@@ -19,11 +25,20 @@ public class BillResponse {
     private Long changeDue;
     private String createdBy;
     private String createdAt;
+    private List<BillItemResponse> items;
 
     public java.util.UUID getId() { return id; }
     public void setId(java.util.UUID id) { this.id = id; }
     public String getBillNumber() { return billNumber; }
     public void setBillNumber(String billNumber) { this.billNumber = billNumber; }
+    public String getVenueName() { return venueName; }
+    public void setVenueName(String venueName) { this.venueName = venueName; }
+    public String getVenueAddress() { return venueAddress; }
+    public void setVenueAddress(String venueAddress) { this.venueAddress = venueAddress; }
+    public String getVenueHotline() { return venueHotline; }
+    public void setVenueHotline(String venueHotline) { this.venueHotline = venueHotline; }
+    public String getVenueWifi() { return venueWifi; }
+    public void setVenueWifi(String venueWifi) { this.venueWifi = venueWifi; }
     public String getRoomNumber() { return roomNumber; }
     public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
     public String getCustomerName() { return customerName; }
@@ -56,4 +71,6 @@ public class BillResponse {
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public List<BillItemResponse> getItems() { return items; }
+    public void setItems(List<BillItemResponse> items) { this.items = items; }
 }

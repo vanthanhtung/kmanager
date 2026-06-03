@@ -49,7 +49,7 @@ public class Room {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    public enum RoomStatus { AVAILABLE, OCCUPIED, CLEANING, MAINTENANCE }
+    public enum RoomStatus { AVAILABLE, OCCUPIED, MAINTENANCE }
 
     public Room() {}
 

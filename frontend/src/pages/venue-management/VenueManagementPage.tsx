@@ -11,6 +11,8 @@ export default function VenueManagementPage() {
 
   const [venueName, setVenueName] = useState('');
   const [address, setAddress] = useState('');
+  const [hotline, setHotline] = useState('');
+  const [wifi, setWifi] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -23,6 +25,8 @@ export default function VenueManagementPage() {
       api.getVenue(venueId!).then(v => {
         setVenueName(v.name);
         setAddress(v.address || '');
+        setHotline(v.hotline || '');
+        setWifi(v.wifi || '');
         setUsername(v.managerUsername || '');
         setIsActive(v.status === 'ACTIVE');
       });
@@ -30,17 +34,23 @@ export default function VenueManagementPage() {
   }, [venueId]);
 
   const handleSave = async () => {
+    if (password && password.length < 6) {
+      setToast(t('venue.password_mismatch'));
+      return;
+    }
     if (!isNew && password && password !== confirmPassword) {
       setToast(t('venue.password_mismatch'));
       return;
     }
     setLoading(true);
     try {
-      const data: any = { venueName, address, username: isNew ? username : undefined, password: password || undefined };
+      const data: any = { venueName, address, hotline, wifi, username: isNew ? username : undefined, password: password || undefined };
       if (isNew) await api.createVenue(data);
       else await api.updateVenue(venueId!, data);
       setToast(isNew ? t('venue.create_success') : t('venue.edit_success'));
       setTimeout(() => { setToast(''); navigate('/admin/venues'); }, 1000);
+    } catch (err: any) {
+      setToast(err.message || t('venue.password_mismatch'));
     } finally {
       setLoading(false);
     }
@@ -69,6 +79,16 @@ export default function VenueManagementPage() {
           <label>{t('venue.address')}</label>
           <input value={address} onChange={e => setAddress(e.target.value)} />
         </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>{t('venue.hotline')}</label>
+            <input value={hotline} onChange={e => setHotline(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>{t('venue.wifi')}</label>
+            <input value={wifi} onChange={e => setWifi(e.target.value)} />
+          </div>
+        </div>
         {!isNew && (
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -90,10 +110,12 @@ export default function VenueManagementPage() {
             <div className="form-group">
               <label>{t('venue.password')} {isNew ? '*' : ''}</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={isNew ? '' : '••••••••'} />
+              {password && password.length < 6 && <span style={{ color: '#dc2626', fontSize: 12 }}>{t('venue.password_min_length')}</span>}
             </div>
             <div className="form-group">
               <label>{t('venue.confirm_password')} {isNew ? '*' : ''}</label>
               <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+              {confirmPassword && password !== confirmPassword && <span style={{ color: '#dc2626', fontSize: 12 }}>{t('venue.password_mismatch')}</span>}
             </div>
           </div>
         </div>

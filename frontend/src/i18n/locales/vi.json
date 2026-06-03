@@ -11,7 +11,7 @@
     "confirm": "Xác nhận",
     "close": "Đóng",
     "add": "Thêm",
-    "edit": "Sửa",
+    "edit": "Sửa thông tin",
     "active": "Đang hoạt động",
     "inactive": "Ngừng hoạt động",
     "all": "Tất cả",
@@ -22,7 +22,9 @@
     "menu": "Thực đơn",
     "rooms": "Phòng",
     "dashboard": "Bảng điều khiển",
-    "admin": "Quản trị"
+    "bills": "Quản lý hoá đơn",
+    "admin": "Quản trị",
+    "manual_bill": "Tạo hoá đơn thủ công"
   },
   "login": {
     "title": "kmanager",
@@ -52,7 +54,14 @@
     "add_item": "Thêm món",
     "generate_bill": "Tính tiền",
     "set_available": "Đặt trống",
-    "start_session": "Bắt đầu"
+    "start_session": "Bắt đầu",
+    "view_room": "Xem phòng",
+    "add_room": "+ Thêm phòng",
+    "modal_title": "Thêm phòng mới",
+    "room_number": "Số phòng",
+    "room_name": "Tên phòng",
+    "area": "Khu vực",
+    "hourly_rate": "Giá theo giờ (VND)"
   },
   "checkin": {
     "title": "Nhận phòng",
@@ -81,7 +90,7 @@
     "no_items": "Chưa có món"
   },
   "bill": {
-    "title": "Hóa đơn",
+    "title": "Hóa đơn tạm tính",
     "bill_number": "Số HĐ",
     "date": "Ngày",
     "cashier": "Thu ngân",
@@ -100,7 +109,10 @@
     "amount_tendered": "Số tiền khách đưa",
     "change_due": "Tiền thối",
     "confirm_payment": "Xác nhận thanh toán",
-    "back_session": "Quay lại phiên"
+    "back_session": "Quay lại phiên",
+    "start_time": "Giờ bắt đầu",
+    "end_time": "Giờ kết thúc",
+    "print": "In"
   },
   "dashboard": {
     "title": "Bảng điều khiển",
@@ -175,12 +187,15 @@
     "edit_title": "Sửa địa điểm",
     "venue_name": "Tên địa điểm",
     "address": "Địa chỉ",
+    "hotline": "Hotline",
+    "wifi": "WiFi",
     "username": "Tên đăng nhập",
     "password": "Mật khẩu",
     "confirm_password": "Xác nhận mật khẩu",
     "username_available": "Có thể dùng",
     "username_taken": "Đã có người dùng",
     "password_mismatch": "Mật khẩu không khớp",
+    "password_min_length": "Mật khẩu cần tối thiểu 6 kí tự",
     "create_success": "Đã tạo địa điểm. Quản lý có thể đăng nhập.",
     "edit_success": "Đã cập nhật địa điểm.",
     "delete_confirm": "Xóa địa điểm này? Tất cả dữ liệu sẽ bị xóa vĩnh viễn.",

@@ -1,6 +1,7 @@
 package com.kmanager.controller;
 
 import com.kmanager.dto.*;
+import com.kmanager.dto.ManualBillRequest;
 import com.kmanager.service.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -60,6 +61,23 @@ public class SessionController {
     @GetMapping("/bills/today")
     public ResponseEntity<List<BillResponse>> getTodayBills(Authentication auth) {
         return ResponseEntity.ok(sessionService.getTodayBills(extractVenueId(auth)));
+    }
+
+    @GetMapping("/bills/all")
+    public ResponseEntity<List<BillResponse>> getAllBills(Authentication auth) {
+        return ResponseEntity.ok(sessionService.getAllBills(extractVenueId(auth)));
+    }
+
+    @GetMapping("/bills/{billId}")
+    public ResponseEntity<BillResponse> getBill(@PathVariable UUID billId, Authentication auth) {
+        return ResponseEntity.ok(sessionService.getBill(extractVenueId(auth), billId));
+    }
+
+    @PostMapping("/bills/manual")
+    public ResponseEntity<BillResponse> createManualBill(
+            @RequestBody ManualBillRequest request,
+            Authentication auth) {
+        return ResponseEntity.ok(sessionService.createManualBill(extractVenueId(auth), request, auth.getName()));
     }
 
     @GetMapping("/dashboard")

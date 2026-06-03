@@ -2,6 +2,8 @@ package com.kmanager.controller;
 
 import com.kmanager.entity.*;
 import com.kmanager.repository.*;
+import com.kmanager.service.SessionService;
+import com.kmanager.dto.SessionResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +19,16 @@ public class ResourceController {
     private final MenuItemRepository menuItemRepository;
     private final MenuCategoryRepository menuCategoryRepository;
     private final VenueRepository venueRepository;
+    private final SessionService sessionService;
 
     public ResourceController(RoomRepository roomRepository, MenuItemRepository menuItemRepository,
-                               MenuCategoryRepository menuCategoryRepository, VenueRepository venueRepository) {
+                               MenuCategoryRepository menuCategoryRepository, VenueRepository venueRepository,
+                               SessionService sessionService) {
         this.roomRepository = roomRepository;
         this.menuItemRepository = menuItemRepository;
         this.menuCategoryRepository = menuCategoryRepository;
         this.venueRepository = venueRepository;
+        this.sessionService = sessionService;
     }
 
     @GetMapping("/rooms")
@@ -43,6 +48,11 @@ public class ResourceController {
     @GetMapping("/rooms/{roomId}")
     public ResponseEntity<Room> getRoom(@PathVariable UUID roomId) {
         return ResponseEntity.ok(roomRepository.findById(roomId).orElseThrow());
+    }
+
+    @GetMapping("/rooms/{roomId}/active-session")
+    public ResponseEntity<SessionResponse> getRoomActiveSession(@PathVariable UUID roomId) {
+        return ResponseEntity.ok(sessionService.getActiveSessionByRoom(roomId));
     }
 
     @PutMapping("/rooms/{roomId}")
@@ -92,14 +102,20 @@ public class ResourceController {
     }
 
     @PutMapping("/menu-items/{itemId}")
-    public ResponseEntity<MenuItem> updateMenuItem(@PathVariable UUID itemId, @RequestBody MenuItem updates) {
+    public ResponseEntity<MenuItem> updateMenuItem(@PathVariable UUID itemId, @RequestBody java.util.Map<String, Object> body) {
         MenuItem item = menuItemRepository.findById(itemId).orElseThrow();
-        if (updates.getNameEn() != null) item.setNameEn(updates.getNameEn());
-        if (updates.getNameVi() != null) item.setNameVi(updates.getNameVi());
-        if (updates.getCategory() != null) item.setCategory(updates.getCategory());
-        if (updates.getPrice() != null) item.setPrice(updates.getPrice());
-        if (updates.getDescription() != null) item.setDescription(updates.getDescription());
-        if (updates.getImageUrl() != null) item.setImageUrl(updates.getImageUrl());
+        if (body.get("code") != null) item.setCode((String) body.get("code"));
+        if (body.get("nameEn") != null) item.setNameEn((String) body.get("nameEn"));
+        if (body.get("nameVi") != null) item.setNameVi((String) body.get("nameVi"));
+        if (body.get("categoryId") != null) {
+            String categoryId = (String) body.get("categoryId");
+            if (categoryId != null && !categoryId.isEmpty()) {
+                item.setCategory(menuCategoryRepository.findById(UUID.fromString(categoryId)).orElseThrow());
+            }
+        }
+        if (body.get("price") != null) item.setPrice(Long.valueOf(((Number) body.get("price")).longValue()));
+        if (body.get("description") != null) item.setDescription((String) body.get("description"));
+        if (body.get("imageUrl") != null) item.setImageUrl((String) body.get("imageUrl"));
         return ResponseEntity.ok(menuItemRepository.save(item));
     }
 

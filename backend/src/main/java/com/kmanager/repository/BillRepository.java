@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public interface BillRepository extends JpaRepository<Bill, UUID> {
     List<Bill> findByVenueIdAndCreatedAtBetweenOrderByCreatedAtDesc(UUID venueId, LocalDateTime start, LocalDateTime end);
+    List<Bill> findByVenueIdOrderByCreatedAtDesc(UUID venueId);
     Optional<Bill> findBySessionId(UUID sessionId);
     long countByVenueIdAndCreatedAtBetween(UUID venueId, LocalDateTime start, LocalDateTime end);
 }

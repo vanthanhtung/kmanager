@@ -22,7 +22,9 @@
     "menu": "Menu",
     "rooms": "Rooms",
     "dashboard": "Dashboard",
-    "admin": "Admin"
+    "bills": "Bills",
+    "admin": "Admin",
+    "manual_bill": "Manual Bill"
   },
   "login": {
     "title": "kmanager",
@@ -52,7 +54,14 @@
     "add_item": "Add Item",
     "generate_bill": "Generate Bill",
     "set_available": "Set Available",
-    "start_session": "Start Session"
+    "start_session": "Start Session",
+    "view_room": "View Room",
+    "add_room": "+ Add Room",
+    "modal_title": "Add New Room",
+    "room_number": "Room Number",
+    "room_name": "Room Name",
+    "area": "Area / Floor",
+    "hourly_rate": "Hourly Rate (VND)"
   },
   "checkin": {
     "title": "Check In",
@@ -81,7 +90,7 @@
     "no_items": "No items yet"
   },
   "bill": {
-    "title": "Bill",
+    "title": "Provisional Bill",
     "bill_number": "Bill #",
     "date": "Date",
     "cashier": "Cashier",
@@ -100,7 +109,10 @@
     "amount_tendered": "Amount Tendered",
     "change_due": "Change Due",
     "confirm_payment": "Confirm Payment",
-    "back_session": "Back to Session"
+    "back_session": "Back to Session",
+    "start_time": "Start Time",
+    "end_time": "End Time",
+    "print": "Print"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -175,12 +187,14 @@
     "edit_title": "Edit Venue",
     "venue_name": "Venue Name",
     "address": "Address",
+    "hotline": "Hotline",
+    "wifi": "WiFi",
     "username": "Username",
-    "password": "Password",
     "confirm_password": "Confirm Password",
     "username_available": "Available",
     "username_taken": "Already taken",
     "password_mismatch": "Passwords do not match",
+    "password_min_length": "Password must be at least 6 characters",
     "create_success": "Venue created. Manager can now log in.",
     "edit_success": "Venue updated.",
     "delete_confirm": "Delete this venue? All data will be permanently removed.",

@@ -32,6 +32,15 @@ export default function RoomBoardPage() {
     } finally { setSaving(false); }
   };
 
+  const handleStartSession = async (roomId: string) => {
+    try {
+      const session = await api.getRoomActiveSession(roomId);
+      navigate(`/session/${session.id}`);
+    } catch {
+      // fallback if no active session
+    }
+  };
+
   const filtered = rooms.filter(r => {
     if (search && !r.roomNumber.includes(search) && !(r.nameEn || '').toLowerCase().includes(search.toLowerCase())) return false;
     if (statusFilter !== 'ALL' && r.status !== statusFilter) return false;
@@ -45,32 +54,32 @@ export default function RoomBoardPage() {
     <div>
       <div className="page-header">
         <h1>{t('board.title')}</h1>
-        <button className="btn-primary" onClick={() => setShowCreate(true)}>+ Thêm phòng</button>
+        <button className="btn-primary" onClick={() => setShowCreate(true)}>{t('board.add_room')}</button>
       </div>
 
       {showCreate && (
         <div className="modal-overlay" onClick={() => setShowCreate(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
-            <h3 style={{ marginBottom: 16 }}>Thêm phòng mới</h3>
+            <h3 style={{ marginBottom: 16 }}>{t('board.modal_title')}</h3>
             <div className="form-group">
-              <label>Số phòng *</label>
+              <label>{t('board.room_number')} *</label>
               <input value={newRoomNumber} onChange={e => setNewRoomNumber(e.target.value)} autoFocus />
             </div>
             <div className="form-group">
-              <label>Tên phòng</label>
+              <label>{t('board.room_name')}</label>
               <input value={newRoomName} onChange={e => setNewRoomName(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>Khu vực</label>
+              <label>{t('board.area')}</label>
               <input value={newRoomArea} onChange={e => setNewRoomArea(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>Giá theo giờ (VND) *</label>
+              <label>{t('board.hourly_rate')} *</label>
               <input type="number" value={newRoomRate} onChange={e => setNewRoomRate(e.target.value)} />
             </div>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 16 }}>
-              <button className="btn-secondary" onClick={() => setShowCreate(false)}>Hủy</button>
-              <button className="btn-primary" onClick={handleCreate} disabled={saving || !newRoomNumber || !newRoomRate}>Lưu</button>
+              <button className="btn-secondary" onClick={() => setShowCreate(false)}>{t('common.cancel')}</button>
+              <button className="btn-primary" onClick={handleCreate} disabled={saving || !newRoomNumber || !newRoomRate}>{t('common.save')}</button>
             </div>
           </div>
         </div>
@@ -79,7 +88,7 @@ export default function RoomBoardPage() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
         <input placeholder={t('board.search_placeholder')} value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 250 }} />
         <div className="chip-group">
-          {['ALL', 'AVAILABLE', 'OCCUPIED', 'CLEANING', 'MAINTENANCE'].map(s => (
+          {['ALL', 'AVAILABLE', 'OCCUPIED', 'MAINTENANCE'].map(s => (
             <button key={s} className={`chip ${statusFilter === s ? 'active' : ''}`} onClick={() => setStatusFilter(s)}>
               {s === 'ALL' ? t('common.all') : statusLabel(s)}
             </button>
@@ -90,7 +99,11 @@ export default function RoomBoardPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
           {filtered.length === 0 && !showCreate && <p style={{ color: '#666' }}>{t('board.no_rooms')}</p>}
           {filtered.map(room => (
-            <div key={room.id} className="card" style={{ borderLeft: `4px solid var(--color-${room.status.toLowerCase()})` }}>
+            <div
+              key={room.id}
+              className="card"
+              style={{ borderLeft: `4px solid var(--color-${room.status.toLowerCase()})` }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                 <strong>{room.roomNumber}</strong>
                 <span className={`badge badge-${room.status.toLowerCase()}`}>{statusLabel(room.status)}</span>
@@ -107,18 +120,15 @@ export default function RoomBoardPage() {
                   </button>
                 )}
                 {room.status === 'OCCUPIED' && (
-                  <button className="btn-primary" style={{ flex: 1 }} onClick={() => navigate(`/session/${room.id}`)}>
-                    {t('board.start_session')}
+                  <button className="btn-primary" style={{ flex: 1 }} onClick={() => handleStartSession(room.id)}>
+                    {t('board.view_room')}
                   </button>
                 )}
-                {room.status === 'CLEANING' && (
-                  <button className="btn-secondary" style={{ flex: 1 }} onClick={async () => { await api.updateRoom(room.id, { status: 'AVAILABLE' }); load(); }}>
-                    {t('board.set_available')}
+                {room.status !== 'OCCUPIED' && (
+                  <button className="btn-secondary" onClick={() => navigate(`/rooms/${room.id}`)}>
+                    {t('common.edit')}
                   </button>
                 )}
-                <button className="btn-secondary" onClick={() => navigate(`/rooms/${room.id}`)}>
-                  ✏️
-                </button>
               </div>
             </div>
           ))}

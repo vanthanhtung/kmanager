@@ -15,7 +15,6 @@ export default function MenuDetailPage() {
   const [categoryId, setCategoryId] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
-  const [isActive, setIsActive] = useState(true);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState('');
@@ -25,8 +24,8 @@ export default function MenuDetailPage() {
     if (!isNew) {
       api.getMenuItem(itemId!).then(item => {
         setCode(item.code); setNameEn(item.nameEn); setNameVi(item.nameVi);
-        setCategoryId(item.category?.id || ''); setPrice(String(item.price));
-        setDescription(item.description || ''); setIsActive(item.isActive);
+        setCategoryId(item.categoryId || ''); setPrice(String(item.price));
+        setDescription(item.description || '');
       });
     }
   }, [itemId]);
@@ -34,11 +33,10 @@ export default function MenuDetailPage() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const data: any = { code, nameEn, nameVi, categoryId, price: parseInt(price), description, isActive };
+      const data: any = { code, nameEn, nameVi, categoryId, price: parseInt(price), description };
       if (isNew) await api.createMenuItem(data);
       else {
-        const updateData = { code, nameEn, nameVi, category: { id: categoryId }, price: parseInt(price), description, isActive };
-        await api.updateMenuItem(itemId!, updateData);
+        await api.updateMenuItem(itemId!, data);
       }
       setToast(t('menuitem.save_success'));
       setTimeout(() => { setToast(''); navigate('/menu'); }, 1000);
@@ -84,10 +82,6 @@ export default function MenuDetailPage() {
           <label>{t('menuitem.description')}</label>
           <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder={t('menuitem.description_placeholder')} />
         </div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} />
-          {t('menuitem.active_label')}
-        </label>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
           <button className="btn-secondary" onClick={() => navigate('/menu')}>{t('common.cancel')}</button>
           <button className="btn-primary" onClick={handleSave} disabled={loading || !code || !nameEn || !nameVi || !categoryId || !price}>
