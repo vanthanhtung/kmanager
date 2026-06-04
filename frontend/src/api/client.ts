@@ -50,6 +50,8 @@ export const api = {
   createRoom: (data: any) => request('/rooms', { method: 'POST', body: JSON.stringify(data) }),
   updateRoom: (id: string, data: any) =>
     request(`/rooms/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteRoom: (id: string) =>
+    request(`/rooms/${id}`, { method: 'DELETE' }),
 
   // Menu
   getMenuItems: (active = true) => request(`/menu-items?active=${active}`),

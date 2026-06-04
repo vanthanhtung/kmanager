@@ -18,6 +18,7 @@ export default function BillClosePage() {
   const isVi = i18n.language.startsWith('vi');
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [amountTendered, setAmountTendered] = useState('');
+  const [amountTouched, setAmountTouched] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [editStart, setEditStart] = useState('');
@@ -169,7 +170,7 @@ export default function BillClosePage() {
             <>
               <div className="form-group">
                 <label>{t('bill.amount_tendered')}</label>
-                <input type="number" value={amountTendered} onChange={e => setAmountTendered(e.target.value)} style={{ maxWidth: 200 }} />
+                <input type="number" value={amountTendered} onFocus={() => { if (!amountTouched) { setAmountTendered(String(grandTotal)); setAmountTouched(true); } }} onChange={e => setAmountTendered(e.target.value)} style={{ maxWidth: 200 }} />
               </div>
               {amountTendered && (
                 <div style={{ fontSize: 16, marginBottom: 12 }}>

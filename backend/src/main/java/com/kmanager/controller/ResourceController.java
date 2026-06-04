@@ -20,15 +20,17 @@ public class ResourceController {
     private final MenuCategoryRepository menuCategoryRepository;
     private final VenueRepository venueRepository;
     private final SessionService sessionService;
+    private final SessionRepository sessionRepository;
 
     public ResourceController(RoomRepository roomRepository, MenuItemRepository menuItemRepository,
                                MenuCategoryRepository menuCategoryRepository, VenueRepository venueRepository,
-                               SessionService sessionService) {
+                               SessionService sessionService, SessionRepository sessionRepository) {
         this.roomRepository = roomRepository;
         this.menuItemRepository = menuItemRepository;
         this.menuCategoryRepository = menuCategoryRepository;
         this.venueRepository = venueRepository;
         this.sessionService = sessionService;
+        this.sessionRepository = sessionRepository;
     }
 
     @GetMapping("/rooms")
@@ -66,6 +68,20 @@ public class ResourceController {
         if (updates.getStatus() != null) room.setStatus(updates.getStatus());
         if (updates.getCategory() != null) room.setCategory(updates.getCategory());
         return ResponseEntity.ok(roomRepository.save(room));
+    }
+
+    @DeleteMapping("/rooms/{roomId}")
+    public ResponseEntity<Void> deleteRoom(@PathVariable UUID roomId) {
+        Room room = roomRepository.findById(roomId).orElseThrow();
+        if (room.getStatus() == Room.RoomStatus.OCCUPIED) {
+            throw new RuntimeException("Cannot delete an occupied room");
+        }
+        List<Session> activeSessions = sessionRepository.findByRoomIdAndStatus(roomId, Session.SessionStatus.ACTIVE);
+        if (!activeSessions.isEmpty()) {
+            throw new RuntimeException("Cannot delete room with active session");
+        }
+        roomRepository.delete(room);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/menu-items")

@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/menu-items/**", "/api/menu-categories/**").authenticated()
+                .requestMatchers("/api/rooms/**").hasRole("VENUE_MANAGER")
                 .anyRequest().hasRole("VENUE_MANAGER")
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

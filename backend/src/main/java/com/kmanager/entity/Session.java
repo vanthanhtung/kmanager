@@ -21,7 +21,7 @@ public class Session {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
+    @JoinColumn(name = "room_id")
     private Room room;
 
     @Column(name = "customer_name", nullable = false, length = 200)

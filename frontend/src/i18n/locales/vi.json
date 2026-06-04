@@ -117,9 +117,9 @@
   "dashboard": {
     "title": "Bảng điều khiển",
     "today_revenue": "Doanh thu hôm nay",
-    "active_sessions": "Đang dùng",
-    "bills_closed": "Đã đóng",
-    "utilization": "Tỉ lệ lấp đầy",
+    "active_sessions": "Phòng đang dùng",
+    "bills_closed": "Hoá đơn đã thanh toán",
+    "utilization": "Tỉ lệ phòng đang hoạt động",
     "revenue_breakdown": "Phân tích doanh thu",
     "room_revenue": "Phòng",
     "item_revenue": "Món",
@@ -169,7 +169,9 @@
     "notes": "Ghi chú",
     "notes_placeholder": "Sức chứa, thiết bị, ghi chú đặc biệt...",
     "rate_warning": "Phòng này đang có khách. Giá mới chỉ áp dụng cho lần nhận phòng sau.",
-    "save_success": "Đã cập nhật phòng"
+    "save_success": "Đã cập nhật phòng",
+    "delete_confirm": "Bạn có chắc muốn xóa phòng này không?",
+    "delete_success": "Đã xóa phòng"
   },
   "venue": {
     "title": "Địa điểm",

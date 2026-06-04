@@ -16,6 +16,7 @@ export default function RoomDetailPage() {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     api.getRoom(roomId!).then(r => {
@@ -33,6 +34,20 @@ export default function RoomDetailPage() {
       setTimeout(() => { setToast(''); navigate('/'); }, 1000);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(t('roomdetail.delete_confirm'))) return;
+    setDeleting(true);
+    try {
+      await api.deleteRoom(roomId!);
+      setToast(t('roomdetail.delete_success'));
+      setTimeout(() => navigate('/'), 800);
+    } catch (e: any) {
+      setToast(e.message || 'Delete failed');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -78,11 +93,16 @@ export default function RoomDetailPage() {
           <label>{t('roomdetail.notes')}</label>
           <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder={t('roomdetail.notes_placeholder')} />
         </div>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-          <button className="btn-secondary" onClick={() => navigate('/')}>{t('common.cancel')}</button>
-          <button className="btn-primary" onClick={handleSave} disabled={loading || !hourlyRate}>
-            {t('common.save')}
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between' }}>
+          <button className="btn-danger" onClick={handleDelete} disabled={deleting || room.status === 'OCCUPIED'}>
+            {deleting ? t('common.loading') : t('common.delete')}
           </button>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button className="btn-secondary" onClick={() => navigate('/')}>{t('common.cancel')}</button>
+            <button className="btn-primary" onClick={handleSave} disabled={loading || !hourlyRate}>
+              {t('common.save')}
+            </button>
+          </div>
         </div>
       </div>
     </div>

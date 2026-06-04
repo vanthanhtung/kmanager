@@ -142,7 +142,7 @@ public class SessionService {
         bill.setSession(session);
         bill.setBillNumber(billNumber);
         bill.setVenueId(venueId);
-        bill.setRoomNumber(session.getRoom().getRoomNumber());
+        bill.setRoomNumber(session.getRoom() != null ? session.getRoom().getRoomNumber() : "N/A");
         bill.setCustomerName(session.getCustomerName());
         bill.setCustomerPhone(session.getCustomerPhone());
         bill.setStartedAt(startAt);
@@ -161,8 +161,10 @@ public class SessionService {
         bill = billRepository.save(bill);
 
         Room room = session.getRoom();
-        room.setStatus(Room.RoomStatus.AVAILABLE);
-        roomRepository.save(room);
+        if (room != null) {
+            room.setStatus(Room.RoomStatus.AVAILABLE);
+            roomRepository.save(room);
+        }
 
         notifyVenue(venueId.toString());
         return toBillResponse(bill, venue);
@@ -193,9 +195,11 @@ public class SessionService {
 
         SessionResponse resp = new SessionResponse();
         resp.setId(s.getId());
-        resp.setRoomId(s.getRoom().getId());
-        resp.setRoomNumber(s.getRoom().getRoomNumber());
-        resp.setRoomName(s.getRoom().getNameEn());
+        if (s.getRoom() != null) {
+            resp.setRoomId(s.getRoom().getId());
+            resp.setRoomNumber(s.getRoom().getRoomNumber());
+            resp.setRoomName(s.getRoom().getNameEn());
+        }
         resp.setVenueName(s.getVenue().getName());
         resp.setVenueAddress(s.getVenue().getAddress());
         resp.setVenueHotline(s.getVenue().getHotline());
@@ -313,13 +317,13 @@ public class SessionService {
     public BillResponse createManualBill(UUID venueId, ManualBillRequest request, String username) {
         Venue venue = venueRepository.findById(venueId).orElseThrow();
 
-        // Create a dummy room — always create a new one to avoid constraint issues
-        Room room = new Room();
-        room.setVenue(venue);
-        room.setRoomNumber("M" + System.currentTimeMillis() % 100000);
-        room.setHourlyRate(request.getHourlyRate() != null ? request.getHourlyRate() : 0L);
-        room.setStatus(Room.RoomStatus.AVAILABLE);
-        room = roomRepository.save(room);
+        // Look up existing room by room number if provided
+        Room room = null;
+        if (request.getRoomNumber() != null && !request.getRoomNumber().isBlank()) {
+            room = roomRepository.findByVenueIdOrderByRoomNumber(venueId).stream()
+                    .filter(r -> r.getRoomNumber().equals(request.getRoomNumber()))
+                    .findFirst().orElse(null);
+        }
 
         // Create session
         Session session = new Session();
