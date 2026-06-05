@@ -1,4 +1,5 @@
 # ui
+- For WDS wireframe generation: use Low-Fi fidelity, Corporate design style, and no annotations. Confidence: 0.70
 - Room cards should have a dedicated Edit button for navigating to room detail, not make the entire card clickable. Confidence: 0.65
 - For OCCUPIED rooms, the action button should say "View Room"/"Xem phòng" instead of "Start Session"/"Bắt đầu". Confidence: 0.65
 - Backend validation errors (e.g., @Size, @NotBlank) should be surfaced as user-friendly messages in the frontend, not hidden behind generic "Request failed" errors. Confidence: 0.70
