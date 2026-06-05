@@ -95,19 +95,57 @@
 
 | Scenario | Page | Status |
 |----------|------|--------|
-| 01-linh-billing-workflow | 01.1 | Login | specified | 2026-06-02 |
-| 01-linh-billing-workflow | 01.2 | Room Status Board | specified | 2026-06-02 |
-| 01-linh-billing-workflow | 01.3 | Room Check-in | specified | 2026-06-02 |
-| 01-linh-billing-workflow | 01.4 | Active Room Session | specified | 2026-06-02 |
-| 01-linh-billing-workflow | 01.5 | Bill Close / Checkout | specified | 2026-06-02 |
-| 01-linh-billing-workflow | 01.6 | Revenue Dashboard | specified | 2026-06-02 |
-| 02-linh-venue-setup | 02.1 | Menu Item List | specified | 2026-06-02 |
-| 02-linh-venue-setup | 02.2 | Menu Item Detail/Edit | specified | 2026-06-02 |
-| 02-linh-venue-setup | 02.3 | Room Detail | specified | 2026-06-02 |
-| 03-tung-venue-admin | 03.1 | Venue List | specified | 2026-06-02 |
-| 03-tung-venue-admin | 03.2 | Venue Management | specified | 2026-06-02 |
+| 01-linh-billing-workflow | 01.1 | Login | implemented | 2026-06-04 |
+| 01-linh-billing-workflow | 01.2 | Room Status Board | implemented | 2026-06-04 |
+| 01-linh-billing-workflow | 01.3 | Room Check-in | implemented | 2026-06-04 |
+| 01-linh-billing-workflow | 01.4 | Active Room Session | implemented | 2026-06-04 |
+| 01-linh-billing-workflow | 01.5 | Bill Close / Checkout | implemented | 2026-06-04 |
+| 01-linh-billing-workflow | 01.6 | Revenue Dashboard | implemented | 2026-06-04 |
+| 02-linh-venue-setup | 02.1 | Menu Item List | implemented | 2026-06-04 |
+| 02-linh-venue-setup | 02.2 | Menu Item Detail/Edit | implemented | 2026-06-04 |
+| 02-linh-venue-setup | 02.3 | Room Detail | implemented | 2026-06-04 |
+| 03-tung-venue-admin | 03.1 | Venue List | implemented | 2026-06-04 |
+| 03-tung-venue-admin | 03.2 | Venue Management | implemented | 2026-06-04 |
 
-**Next:** Development (Phase 5: Agentic Development) or Design System extraction
+**Next:** Development System extraction (Phase 7: Design System)
+
+---
+
+### 2026-06-04 — Phase 5: Agentic Development Complete
+
+**Agent:** Mimir (Builder)
+**Method:** `wds-5-agentic-development`
+
+**Summary:** Implemented full-stack karaoke/restaurant management system from UX specs. All 11 page specs implemented plus 5 additional pages. Real-time WebSocket communication, role-based auth (SUPER_ADMIN / VENUE_MANAGER), full i18n (EN/VI), and 37 E2E Playwright tests.
+
+**Backend (41 Java source files):**
+- 9 JPA entities: `Bill`, `BillItem`, `MenuCategory`, `MenuItem`, `Room`, `RoomCategory`, `Session`, `Venue`, `VenueManager` — UUID PKs, i18n computed getters
+- 4 controllers: `AuthController` (POST /api/auth/login), `AdminController` (venue CRUD), `SessionController` (session lifecycle, billing, manual bills, dashboard), `ResourceController` (rooms, menu items, menu categories CRUD)
+- 2 services: `VenueService` (auth, venue CRUD), `SessionService` (399 lines: session lifecycle, billing, manual bills, dashboard, WebSocket notifications)
+- 12 DTOs: `LoginRequest/Response`, `CreateVenueRequest`, `VenueResponse`, `CreateSessionRequest`, `SessionResponse`, `AddItemRequest`, `CloseBillRequest`, `BillResponse`, `BillItemResponse`, `ManualBillRequest`, `DashboardResponse`
+- 8 JPA repositories
+- Security: `SecurityConfig` (stateless JWT, role-based), `JwtAuthFilter`, `JwtUtil` (HS384, 24h expiry)
+- WebSocket: `WebSocketController` + `WebSocketConfig` (STOMP/SockJS — real-time room & dashboard updates)
+- 7 Flyway migrations: full schema, seed data, schema refinements (removed CLEANING status, nullable FKs, SET NULL on delete)
+
+**Frontend (16 pages + supporting code):**
+- All 11 UX-design pages: `LoginPage`, `RoomBoardPage`, `RoomCheckinPage`, `ActiveSessionPage`, `BillClosePage`, `DashboardPage`, `MenuListPage`, `MenuDetailPage`, `RoomDetailPage`, `VenueListPage`, `VenueManagementPage`
+- 5 additional pages: `BillDetailPage`, `BillsPage`, `ManualBillPage`
+- `AppLayout.tsx` — Top nav bar with role-based links, lang toggle, logout
+- `api/client.ts` — Centralized fetch client (auth headers, error handling)
+- `store/auth.tsx` — React Context auth provider
+- `i18n/` — Full i18n with ~210 keys per language (English / Tiếng Việt)
+- `App.tsx` — React Router with 16 routes, `Protected` route guard
+
+**Testing:** 37 Playwright E2E tests across 8 spec files: login, room-board, menu, billing, manual-bill, dashboard, venue-admin
+
+**Key Deviations from UX Specs:**
+- Added `BillDetailPage`, `BillsPage`, `ManualBillPage` beyond original 11-page scope
+- All component subdirectories under `components/` left empty — UI inlined in page files per project convention
+- No backend unit tests — coverage via E2E Playwright only
+- No formal story/sprint decomposition in `planning-artifacts/` — developed directly from UX specs
+
+**Next:** Design System extraction (Phase 7) or Asset Generation (Phase 6)
 
 ---
 
@@ -121,3 +159,7 @@
 | 2026-06-02 | Single account per venue, one person does everything; super admin manages venue accounts | Phase 3: Scenarios | Tungvan |
 | 2026-06-02 | i18n required on all pages: English / Tiếng Việt language toggle | Phase 3: Scenarios | Tungvan |
 | 2026-06-02 | Scenarios consolidated to 3: Billing Workflow, Venue Setup, Super Admin — kitchen display/floor mobile removed | Phase 3: Scenarios | Saga + Tungvan |
+| 2026-06-04 | Developed directly from UX specs without formal sprint/story decomposition in planning-artifacts | Phase 5: Dev | Mimir |
+| 2026-06-04 | Added 3 extra pages beyond 11 UX specs: BillDetail, Bills list, Manual Bill creation | Phase 5: Dev | Mimir |
+| 2026-06-04 | UI inlined in page files (inline `style={{}}`) — no CSS modules or separate component files | Phase 5: Dev | Mimir |
+| 2026-06-04 | No backend unit tests — coverage via 37 Playwright E2E tests only | Phase 5: Dev | Mimir |
