@@ -62,6 +62,8 @@ export const api = {
     request(`/menu-items/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   toggleMenuItemActive: (id: string) =>
     request(`/menu-items/${id}/toggle-active`, { method: 'PUT' }),
+  deleteMenuItem: (id: string) =>
+    request(`/menu-items/${id}`, { method: 'DELETE' }),
 
   getMenuCategories: () => request('/menu-categories'),
 

@@ -155,7 +155,9 @@
     "active_label": "Active (appears in billing)",
     "image_placeholder": "Drop image or click to upload",
     "duplicate_code": "Code already exists",
-    "save_success": "Item saved"
+    "save_success": "Item saved",
+    "delete_confirm": "Are you sure you want to delete this item?",
+    "delete_success": "Item deleted"
   },
   "roomdetail": {
     "back": "Back to Rooms",

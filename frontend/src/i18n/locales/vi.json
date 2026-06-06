@@ -155,7 +155,9 @@
     "active_label": "Hiển thị (xuất hiện khi tính tiền)",
     "image_placeholder": "Kéo thả ảnh hoặc nhấn để tải lên",
     "duplicate_code": "Mã đã tồn tại",
-    "save_success": "Đã lưu món"
+    "save_success": "Đã lưu món",
+    "delete_confirm": "Bạn có chắc muốn xóa món này không?",
+    "delete_success": "Đã xóa món"
   },
   "roomdetail": {
     "back": "Quay lại Phòng",

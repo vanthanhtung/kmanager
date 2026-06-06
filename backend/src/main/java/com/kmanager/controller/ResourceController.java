@@ -142,6 +142,12 @@ public class ResourceController {
         return ResponseEntity.ok(menuItemRepository.save(item));
     }
 
+    @DeleteMapping("/menu-items/{itemId}")
+    public ResponseEntity<Void> deleteMenuItem(@PathVariable UUID itemId) {
+        menuItemRepository.deleteById(itemId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/menu-categories")
     public ResponseEntity<List<MenuCategory>> getMenuCategories(HttpServletRequest request) {
         return ResponseEntity.ok(menuCategoryRepository.findByVenueIdOrderBySortOrder(extractVenueId(request)));

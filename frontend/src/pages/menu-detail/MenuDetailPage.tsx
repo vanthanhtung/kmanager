@@ -19,6 +19,7 @@ export default function MenuDetailPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     api.getMenuCategories().then(setCategories);
@@ -43,6 +44,20 @@ export default function MenuDetailPage() {
       setTimeout(() => { setToast(''); navigate('/menu'); }, 1000);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(t('menuitem.delete_confirm'))) return;
+    setDeleting(true);
+    try {
+      await api.deleteMenuItem(itemId!);
+      setToast(t('menuitem.delete_success'));
+      setTimeout(() => navigate('/menu'), 800);
+    } catch (e: any) {
+      setToast(e.message || 'Delete failed');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -83,11 +98,19 @@ export default function MenuDetailPage() {
           <label>{t('menuitem.description')}</label>
           <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder={t('menuitem.description_placeholder')} />
         </div>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-          <button className="btn-secondary" onClick={() => navigate('/menu')}>{t('common.cancel')}</button>
-          <button className="btn-primary" onClick={handleSave} disabled={loading || !code || !nameEn || !nameVi || !categoryId || !price}>
-            {t('common.save')}
-          </button>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between' }}>
+          {!isNew && (
+            <button className="btn-danger" onClick={handleDelete} disabled={deleting}>
+              {deleting ? t('common.loading') : t('common.delete')}
+            </button>
+          )}
+          {isNew && <div />}
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button className="btn-secondary" onClick={() => navigate('/menu')}>{t('common.cancel')}</button>
+            <button className="btn-primary" onClick={handleSave} disabled={loading || !code || !nameEn || !nameVi || !categoryId || !price}>
+              {t('common.save')}
+            </button>
+          </div>
         </div>
       </div>
     </div>
