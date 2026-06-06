@@ -74,6 +74,8 @@ export const api = {
     request(`/sessions/${sessionId}/items`, {
       method: 'POST', body: JSON.stringify({ menuItemId, quantity }),
     }),
+  removeItem: (sessionId: string, itemId: string) =>
+    request(`/sessions/${sessionId}/items/${itemId}`, { method: 'DELETE' }),
   closeBill: (sessionId: string, paymentMethod: string, amountTendered?: number, overrides?: any) =>
     request(`/sessions/${sessionId}/close`, {
       method: 'POST', body: JSON.stringify({ paymentMethod, amountTendered, ...overrides }),

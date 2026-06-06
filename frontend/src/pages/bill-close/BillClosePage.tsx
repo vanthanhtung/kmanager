@@ -63,6 +63,11 @@ export default function BillClosePage() {
 
   const canConfirm = paymentMethod !== 'CASH' || (tenderedAmount >= grandTotal && grandTotal > 0);
 
+  const removeItem = async (itemId: string) => {
+    const updated = await api.removeItem(sessionId!, itemId);
+    setSession(updated);
+  };
+
   const handleClose = async () => {
     const tendered = paymentMethod === 'CASH' ? parseInt(amountTendered) : undefined;
     const bill = await api.closeBill(sessionId!, paymentMethod, tendered, {
@@ -123,7 +128,7 @@ export default function BillClosePage() {
         </div>
         <table style={{ marginBottom: 16 }}>
           <thead>
-            <tr><th>#</th><th>{t('menu.name')}</th><th>{isVi ? 'Số lượng' : 'Qty'}</th><th>{t('menu.price')}</th><th>{t('bill.grand_total')}</th></tr>
+            <tr><th>#</th><th>{t('menu.name')}</th><th>{isVi ? 'Số lượng' : 'Qty'}</th><th>{t('menu.price')}</th><th>{t('bill.grand_total')}</th><th></th></tr>
           </thead>
           <tbody>
             {session.items?.map((item: any, idx: number) => (
@@ -133,6 +138,7 @@ export default function BillClosePage() {
                 <td>{item.quantity}</td>
                 <td>{formatCurrency(item.unitPrice)}</td>
                 <td>{formatCurrency(item.lineTotal)}</td>
+                <td><button className="btn-sm" style={{ padding: '2px 6px', fontSize: 12, background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: 4, cursor: 'pointer' }} onClick={() => removeItem(item.id)}>✕</button></td>
               </tr>
             ))}
           </tbody>

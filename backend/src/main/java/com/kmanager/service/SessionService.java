@@ -68,6 +68,22 @@ public class SessionService {
     }
 
     @Transactional
+    public SessionResponse removeItem(UUID venueId, UUID sessionId, UUID itemId) {
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+
+        if (session.getStatus() != Session.SessionStatus.ACTIVE) {
+            throw new RuntimeException("Session is not active");
+        }
+
+        billItemRepository.deleteById(itemId);
+        session.getBillItems().removeIf(i -> i.getId().equals(itemId));
+
+        notifyVenue(venueId.toString());
+        return toSessionResponse(session);
+    }
+
+    @Transactional
     public SessionResponse addItem(UUID venueId, UUID sessionId, AddItemRequest request) {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found"));

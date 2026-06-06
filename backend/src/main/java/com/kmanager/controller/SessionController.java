@@ -50,6 +50,14 @@ public class SessionController {
         return ResponseEntity.ok(sessionService.addItem(extractVenueId(auth), sessionId, request));
     }
 
+    @DeleteMapping("/{sessionId}/items/{itemId}")
+    public ResponseEntity<SessionResponse> removeItem(
+            @PathVariable UUID sessionId,
+            @PathVariable UUID itemId,
+            Authentication auth) {
+        return ResponseEntity.ok(sessionService.removeItem(extractVenueId(auth), sessionId, itemId));
+    }
+
     @PostMapping("/{sessionId}/close")
     public ResponseEntity<BillResponse> closeBill(
             @PathVariable UUID sessionId,

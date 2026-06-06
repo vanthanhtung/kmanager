@@ -38,6 +38,11 @@ export default function ActiveSessionPage() {
     }
   };
 
+  const removeItem = async (itemId: string) => {
+    const updated = await api.removeItem(sessionId!, itemId);
+    setSession(updated);
+  };
+
   const formatCurrency = (v: number) => v.toLocaleString('vi-VN') + 'đ';
   const formatTime = (s: number) => {
     const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
@@ -88,9 +93,12 @@ export default function ActiveSessionPage() {
         <div style={{ flex: 1, overflow: 'auto', marginBottom: 12 }}>
           {(!session.items || session.items.length === 0) && <p style={{ fontSize: 13, color: '#666' }}>{t('session.no_items')}</p>}
           {session.items?.map((item: any, idx: number) => (
-            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #eee', fontSize: 14 }}>
+            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #eee', fontSize: 14 }}>
               <span>{item.quantity}× {isVi ? (item.itemNameVi || item.itemNameEn) : item.itemNameEn}</span>
-              <span>{formatCurrency(item.lineTotal)}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>{formatCurrency(item.lineTotal)}</span>
+                <button className="btn-sm" style={{ padding: '2px 6px', fontSize: 12, background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: 4, cursor: 'pointer' }} onClick={() => removeItem(item.id)}>✕</button>
+              </div>
             </div>
           ))}
         </div>
