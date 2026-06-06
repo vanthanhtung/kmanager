@@ -1,0 +1,93 @@
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kmanager-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kmanager
+      POSTGRES_USER: kmanager
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-kmanager}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kmanager -d kmanager"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  flyway:
+    image: flyway/flyway:11-alpine
+    container_name: kmanager-flyway
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/kmanager
+      FLYWAY_USER: kmanager
+      FLYWAY_PASSWORD: ${DB_PASSWORD:-kmanager}
+      FLYWAY_CONNECT_RETRIES: 10
+      FLYWAY_CONNECT_RETRIES_INTERVAL: 5
+    volumes:
+      - ./backend/src/main/resources/db/migration:/flyway/sql
+    networks:
+      - app-network
+    command: migrate
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kmanager-backend
+    restart: unless-stopped
+    depends_on:
+      flyway:
+        condition: service_completed_successfully
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kmanager
+      SPRING_DATASOURCE_USERNAME: kmanager
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-kmanager}
+      SPRING_FLYWAY_ENABLED: "false"
+      JWT_SECRET: ${JWT_SECRET}
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kmanager-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
+  backup:
+    image: postgres:16-alpine
+    container_name: kmanager-backup
+    profiles: ["backup"]
+    environment:
+      PGPASSWORD: ${DB_PASSWORD:-kmanager}
+    volumes:
+      - pgbackups:/backups
+      - ./backup.sh:/backup.sh:ro
+    networks:
+      - app-network
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    command: ["postgres", "5432", "kmanager", "kmanager"]
+
+volumes:
+  pgdata:
+    name: kmanager-pgdata
+  pgbackups:
+    name: kmanager-pgbackups

@@ -7,7 +7,7 @@ BEGIN
         INSERT INTO menu_categories (venue_id, name_en, name_vi, sort_order) VALUES
             (v.id, 'Food', 'Món ăn', 1),
             (v.id, 'Drink', 'Đồ uống', 2),
-            (v.id, 'Other', 'Khác', 3)
+            (v.id, 'Other', 'Món khác', 3)
         ON CONFLICT DO NOTHING;
     END LOOP;
 END $$;

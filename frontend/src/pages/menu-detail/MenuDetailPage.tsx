@@ -4,7 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
 
 export default function MenuDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isVi = i18n.language.startsWith('vi');
   const navigate = useNavigate();
   const { itemId } = useParams<{ itemId: string }>();
   const isNew = !itemId;
@@ -71,7 +72,7 @@ export default function MenuDetailPage() {
           <label>{t('menuitem.category')} *</label>
           <select value={categoryId} onChange={e => setCategoryId(e.target.value)}>
             <option value="">—</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.nameEn}</option>)}
+            {categories.map(c => <option key={c.id} value={c.id}>{isVi ? (c.nameVi || c.nameEn) : c.nameEn}</option>)}
           </select>
         </div>
         <div className="form-group">

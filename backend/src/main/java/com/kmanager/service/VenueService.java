@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -19,16 +20,19 @@ public class VenueService {
     private final VenueManagerRepository managerRepository;
     private final RoomRepository roomRepository;
     private final MenuItemRepository menuItemRepository;
+    private final MenuCategoryRepository menuCategoryRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
     public VenueService(VenueRepository venueRepository, VenueManagerRepository managerRepository,
                         RoomRepository roomRepository, MenuItemRepository menuItemRepository,
+                        MenuCategoryRepository menuCategoryRepository,
                         JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
         this.venueRepository = venueRepository;
         this.managerRepository = managerRepository;
         this.roomRepository = roomRepository;
         this.menuItemRepository = menuItemRepository;
+        this.menuCategoryRepository = menuCategoryRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
     }
@@ -74,6 +78,8 @@ public class VenueService {
         manager.setUsername(request.getUsername());
         manager.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         managerRepository.save(manager);
+
+        seedDefaultMenuCategories(venue);
 
         return toVenueResponse(venue);
     }
@@ -134,5 +140,22 @@ public class VenueService {
         resp.setLastActivity(v.getUpdatedAt());
         resp.setCreatedAt(v.getCreatedAt());
         return resp;
+    }
+
+    private void seedDefaultMenuCategories(Venue venue) {
+        Map<String, String[]> categories = Map.of(
+            "Food", new String[]{"Món ăn", "1"},
+            "Drink", new String[]{"Đồ uống", "2"},
+            "Other", new String[]{"Món khác", "3"}
+        );
+
+        for (var entry : categories.entrySet()) {
+            MenuCategory cat = new MenuCategory();
+            cat.setVenue(venue);
+            cat.setNameEn(entry.getKey());
+            cat.setNameVi(entry.getValue()[0]);
+            cat.setSortOrder(Integer.parseInt(entry.getValue()[1]));
+            menuCategoryRepository.save(cat);
+        }
     }
 }
