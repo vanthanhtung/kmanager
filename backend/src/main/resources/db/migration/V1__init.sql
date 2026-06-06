@@ -129,4 +129,4 @@ CREATE TABLE bills (
 CREATE INDEX idx_bills_venue_date ON bills(venue_id, created_at);
 
 INSERT INTO super_admins (username, password_hash) VALUES
-('admin', '$2a$10$dummyhashreplacewithrealhash'); -- change in production
+('tungvan', '$2a$10$1xvNPtC4Ff3WpIgG.Z8GbeLXDp1Pvkt4Sx3sE.jzar8WdwzSkw3eq');

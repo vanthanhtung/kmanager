@@ -18,6 +18,7 @@ public class VenueService {
 
     private final VenueRepository venueRepository;
     private final VenueManagerRepository managerRepository;
+    private final SuperAdminRepository superAdminRepository;
     private final RoomRepository roomRepository;
     private final MenuItemRepository menuItemRepository;
     private final MenuCategoryRepository menuCategoryRepository;
@@ -25,11 +26,13 @@ public class VenueService {
     private final PasswordEncoder passwordEncoder;
 
     public VenueService(VenueRepository venueRepository, VenueManagerRepository managerRepository,
+                        SuperAdminRepository superAdminRepository,
                         RoomRepository roomRepository, MenuItemRepository menuItemRepository,
                         MenuCategoryRepository menuCategoryRepository,
                         JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
         this.venueRepository = venueRepository;
         this.managerRepository = managerRepository;
+        this.superAdminRepository = superAdminRepository;
         this.roomRepository = roomRepository;
         this.menuItemRepository = menuItemRepository;
         this.menuCategoryRepository = menuCategoryRepository;
@@ -38,7 +41,11 @@ public class VenueService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        if ("admin".equals(request.getUsername())) {
+        var superAdmin = superAdminRepository.findByUsername(request.getUsername());
+        if (superAdmin.isPresent()) {
+            if (!passwordEncoder.matches(request.getPassword(), superAdmin.get().getPasswordHash())) {
+                throw new RuntimeException("Invalid credentials");
+            }
             String token = jwtUtil.generateToken(request.getUsername(), "SUPER_ADMIN", null);
             return new LoginResponse(token, "SUPER_ADMIN", null, null);
         }
